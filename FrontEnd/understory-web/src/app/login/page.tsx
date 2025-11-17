@@ -1,10 +1,12 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { Suspense } from 'react'
+import type { FormEvent } from 'react'
+import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter()
   const search = useSearchParams()
   const { login, register } = useAuth()
@@ -16,7 +18,7 @@ export default function LoginPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [phone, setPhone] = useState('') // 👈 NY STATE
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,7 +31,8 @@ export default function LoginPage() {
       if (mode === 'login') {
         await login(email, password)
       } else {
-        await register(name, email, password, phone) // 👈 SEND PHONE MED
+        // signup – phone sendes med nu
+        await register(name, email, password, phone)
       }
       router.push('/')
     } catch (err: any) {
@@ -53,17 +56,32 @@ export default function LoginPage() {
 
         <form onSubmit={onSubmit} className="mt-4 space-y-3">
           {mode === 'signup' && (
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-300">
-                Navn
-              </label>
-              <input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required={mode === 'signup'}
-                placeholder="Dit navn"
-              />
-            </div>
+            <>
+              <div className="space-y-1">
+                <label className="block text-xs font-medium text-slate-300">
+                  Navn
+                </label>
+                <input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  required={mode === 'signup'}
+                  placeholder="Dit navn"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-medium text-slate-300">
+                  Telefon
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  required={mode === 'signup'}
+                  placeholder="+45 12 34 56 78"
+                />
+              </div>
+            </>
           )}
 
           <div className="space-y-1">
@@ -92,21 +110,6 @@ export default function LoginPage() {
               placeholder="Mindst 8 tegn"
             />
           </div>
-
-          {mode === 'signup' && (
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-slate-300">
-                Telefon (til SMS)
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+45 12 34 56 78"
-                required={mode === 'signup'}
-              />
-            </div>
-          )}
 
           {error && (
             <p className="rounded-xl border border-red-500/40 bg-red-950/40 px-3 py-2 text-xs text-red-100">
@@ -160,5 +163,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="pt-10 text-center text-slate-400">Indlæser login…</div>}>
+      <LoginPageInner />
+    </Suspense>
   )
 }
