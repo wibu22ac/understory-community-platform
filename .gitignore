@@ -9,3 +9,6 @@ BackEnd/understory-community/api/jwtRS256.key.pub
 FrontEnd/understory-web/.env.local
 FrontEnd/understory-web/node_modules
 FrontEnd/understory-web/.next
+FrontEnd/understory-web/.env.local
+FrontEnd/understory-web/node_modules
+FrontEnd/understory-web/.next
