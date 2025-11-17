@@ -4,16 +4,18 @@ import React, { createContext, useContext, useState } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080'
 
+type User = {
+  id: string
+  email: string
+  name: string
+  createdAt: string
+}
+
 type AuthContextValue = {
   access: string | null
+  user: User | null
   login: (email: string, password: string) => Promise<void>
-  // 👇 register tager nu også phone som 4. argument (valgfrit)
-  register: (
-    name: string,
-    email: string,
-    password: string,
-    phone?: string
-  ) => Promise<void>
+  register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -21,6 +23,30 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [access, setAccess] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+
+  async function loadUser(token: string) {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+      })
+
+      if (!res.ok) {
+        console.warn('Kunne ikke hente /api/auth/me', await res.text())
+        return
+      }
+
+      const data = await res.json()
+      setUser(data)
+    } catch (err) {
+      console.error('Fejl ved hentning af brugerprofil:', err)
+    }
+  }
 
   async function login(email: string, password: string) {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
@@ -37,24 +63,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const data = await res.json()
     setAccess(data.access)
+    await loadUser(data.access)
   }
 
-  async function register(
-    name: string,
-    email: string,
-    password: string,
-    phone?: string
-  ) {
-    // 1) Opret bruger
+  async function register(name: string, email: string, password: string) {
     const res = await fetch(`${API_BASE}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        phone, // 👈 send telefonnummer med til backend
-      }),
+      body: JSON.stringify({ name, email, password }),
     })
 
     if (!res.ok) {
@@ -62,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(body.error || 'Registration failed')
     }
 
-    // 2) Log automatisk ind bagefter
+    // log automatisk ind bagefter
     await login(email, password)
   }
 
@@ -72,10 +88,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       credentials: 'include',
     })
     setAccess(null)
+    setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ access, login, register, logout }}>
+    <AuthContext.Provider value={{ access, user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
