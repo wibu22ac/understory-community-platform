@@ -1,12 +1,12 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8080'
 
-export default function UploadPage() {
+function UploadPageInner() {
   const { access } = useAuth()
   const router = useRouter()
   const search = useSearchParams()
@@ -22,7 +22,8 @@ export default function UploadPage() {
   if (!access) {
     return (
       <div className="rounded-2xl border border-amber-500/40 bg-amber-950/30 px-4 py-4 text-sm text-amber-100">
-        Du skal være logget ind for at uploade. Gå til <span className="font-semibold">Login</span> og prøv igen.
+        Du skal være logget ind for at uploade. Gå til{' '}
+        <span className="font-semibold">Login</span> og prøv igen.
       </div>
     )
   }
@@ -72,13 +73,16 @@ export default function UploadPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-semibold text-slate-50">Upload oplevelse</h1>
+        <h1 className="text-xl font-semibold text-slate-50">
+          Upload oplevelse
+        </h1>
         <p className="text-xs text-slate-400">
           Del et billede og en kort tekst fra din seneste Understory-oplevelse.
         </p>
         {ref && (
           <p className="mt-1 text-xs text-emerald-300">
-            Oprettes som svar på booking: <span className="font-mono">{ref}</span>
+            Oprettes som svar på booking:{' '}
+            <span className="font-mono">{ref}</span>
           </p>
         )}
       </div>
@@ -99,7 +103,8 @@ export default function UploadPage() {
           />
           {file && (
             <p className="text-xs text-slate-400">
-              Valgt: <span className="font-medium text-slate-200">{file.name}</span>
+              Valgt:{' '}
+              <span className="font-medium text-slate-200">{file.name}</span>
             </p>
           )}
         </div>
@@ -147,5 +152,19 @@ export default function UploadPage() {
         </button>
       </form>
     </div>
+  )
+}
+
+export default function UploadPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="pt-10 text-center text-slate-400">
+          Indlæser upload-siden…
+        </div>
+      }
+    >
+      <UploadPageInner />
+    </Suspense>
   )
 }
