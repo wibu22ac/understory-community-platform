@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DdlMappings">
+    <mapping uuid="4882ceae-4e37-4525-a06f-ae4cc3856288" name="newsserver1999.database.windows.net Mapping">
+      <data-sources db="86751e28-eb78-4fe8-adb1-1cbfbb335e3f" />
+      <scope>
+        <node kind="database" negative="1" />
+      </scope>
+    </mapping>
+  </component>
+</project>
