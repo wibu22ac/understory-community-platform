@@ -15,9 +15,15 @@ type AuthContextValue = {
   access: string | null
   user: User | null
   login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phone: string
+  ) => Promise<void>
   logout: () => Promise<void>
 }
+
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
@@ -66,21 +72,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await loadUser(data.access)
   }
 
-  async function register(name: string, email: string, password: string) {
-    const res = await fetch(`${API_BASE}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    })
+ async function register(
+  name: string,
+  email: string,
+  password: string,
+  phone: string
+) {
+  const res = await fetch(`${API_BASE}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password, phone }), // 👈 phone med
+  })
 
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || 'Registration failed')
-    }
-
-    // log automatisk ind bagefter
-    await login(email, password)
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error || 'Registration failed')
   }
+
+  // 2) Log automatisk ind bagefter
+  await login(email, password)
+}
+
 
   async function logout() {
     await fetch(`${API_BASE}/api/auth/logout`, {
