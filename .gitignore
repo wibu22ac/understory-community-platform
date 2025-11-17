@@ -2,3 +2,10 @@ BackEnd/understory-community/api/.env
 FrontEnd/understory-web/.env.local
 node_modules
 .next
+BackEnd/understory-community/api/.env
+BackEnd/understory-community/api/node_modules
+BackEnd/understory-community/api/jwtRS256.key
+BackEnd/understory-community/api/jwtRS256.key.pub
+FrontEnd/understory-web/.env.local
+FrontEnd/understory-web/node_modules
+FrontEnd/understory-web/.next
