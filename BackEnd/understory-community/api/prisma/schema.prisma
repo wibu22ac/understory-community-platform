@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  phone        String?
+  createdAt    DateTime  @default(now())
+  posts        Post[]
+  comments     Comment[]
+  likes        Like[]
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  imageUrl  String
+  caption   String
+  tags      String[]
+  createdAt DateTime  @default(now())
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id     String @id @default(uuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId])
+}
+
+
+model Reminder {
+  id           String   @id @default(uuid())
+  email        String?
+  phone        String?
+  experienceId String
+  dueAt        DateTime
+  status       String   @default("pending") // pending | sent | failed | cancelled
+  attempts     Int      @default(0)
+  lastError    String?
+  sentAt       DateTime?
+  createdAt    DateTime @default(now())
+}
+
