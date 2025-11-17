@@ -1,0 +1,4 @@
+BackEnd/understory-community/api/.env
+FrontEnd/understory-web/.env.local
+node_modules
+.next
